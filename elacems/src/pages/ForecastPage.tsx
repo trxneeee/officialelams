@@ -158,7 +158,7 @@ export default function ForecastPage() {
         setSnackbar({ open: true, message: `Loaded ${requiredItems.length} required items for ${selectedSubject.name}`, severity: "success" });
       } else {
         setItems([]);
-        setSnackbar({ open: true, message: "No required items defined for this subject", severity: "info" });
+        setSnackbar({ open: true, message: "No required items defined for this subject", severity: "error" });
       }
     } catch (err) {
       console.error("Error loading subject items", err);
