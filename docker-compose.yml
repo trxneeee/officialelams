@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    restart: always
+
+  client:
+    build: ./elacems
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    restart: always
