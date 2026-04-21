@@ -5,12 +5,10 @@ services:
     build: ./server
     ports:
       - "5000:5000"
-    restart: always
 
   client:
     build: ./elacems
     ports:
-      - "80:80"
+      - "5173:5173"
     depends_on:
       - server
-    restart: always
