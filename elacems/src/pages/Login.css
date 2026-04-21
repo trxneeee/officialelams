@@ -1,0 +1,172 @@
+/* Background */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #4a0d0d, #9b1c1c, #b91c1c);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin:0;
+}
+
+/* Card */
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 2rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 420px;
+  border-top: 8px solid #991b1b;
+  text-align: center;
+}
+
+/* Logo */
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.logo {
+  width: 150px;
+  height: 150px;
+}
+
+/* Titles */
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #7f1d1d;
+  margin-bottom: 0.5rem;
+}
+.subtitle {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+/* Alerts */
+.alert {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.alert.error {
+  color: #991b1b;
+  background: #fee2e2;
+}
+.alert.success {
+  color: #166534;
+  background: #dcfce7;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.input:focus {
+  outline: none;
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.3);
+}
+
+/* Button */
+.btn {
+  padding: 0.75rem;
+  background: #991b1b;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.btn:hover {
+  background: #7f1d1d;
+  transform: scale(1.03);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.footer {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+.highlight {
+  color: #991b1b;
+  font-weight: 600;
+}
+.login-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Background image */
+  background: url("../assets/seabackground.jpg") no-repeat center center/cover;
+}
+
+/* Overlay layer */
+.login-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5); /* 👈 Adjust opacity & color */
+  z-index: 0;
+}
+
+/* Keep card above overlay */
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.9); /* optional card transparency */
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.login-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Background image */
+  background: url("../assets/seabackground.jpg") no-repeat center center/cover;
+}
+
+/* Overlay keeps the old background color */
+.login-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(200, 16, 47, 0.256); /* 👈 UB red with 75% opacity */
+  z-index: 0;
+}
+
+/* Card above overlay */
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.9); /* optional */
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}

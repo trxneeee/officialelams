@@ -1,0 +1,147 @@
+/* General layout (same as before) */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f6f8;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout container */
+.app-layout {
+  display: flex;
+  flex: 1;
+  margin-top: 64px; /* offset for header */
+  height: calc(100vh - 124px); /* full height minus header/footer */
+  overflow: hidden;
+  margin-bottom: 50px;
+}
+
+/* ----------------- 📌 TODO PANEL (Google Classroom style) ----------------- */
+.todo-panel {
+  width: 200px;
+  background: #fff;
+  border-right: 1px solid #e0e0e0;
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+  box-shadow: inset -1px 0 0 #e0e0e0;
+}
+
+.todo-panel h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.todo-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.todo-panel li {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  color: #444;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.todo-panel li:hover {
+  background: #f1f3f4;
+}
+
+/* ----------------- 🔔 NOTIFICATION PANEL (Facebook style) ----------------- */
+.notification-panel {
+  width: 200px;
+  background: #fff;
+  border-left: 1px solid #e0e0e0;
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+  box-shadow: inset 1px 0 0 #e0e0e0;
+}
+
+.notification-panel h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.notification-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-panel li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background 0.2s ease;
+  cursor: pointer;
+  border-bottom: 1px solid #eee; /* divider */
+  font-size: 0.95rem;
+}
+
+.notification-panel li:hover {
+  background: #f0f2f5;
+}
+
+/* Small notification icon (like Facebook) */
+.notification-icon {
+  width: 36px;
+  height: 36px;
+  background: #1877f2;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Text part */
+.notification-text {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.notification-panel li:last-child {
+  border-bottom: none; /* remove divider from last */
+}
+
+/* ----------------- MAIN CONTENT ----------------- */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* Responsive: hide side panels on small screens */
+@media (max-width: 1000px) {
+  .todo-panel,
+  .notification-panel {
+    display: none;
+  }
+  .calendar-panel{
+    display: none;
+  }
+}
