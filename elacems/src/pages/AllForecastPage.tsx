@@ -43,11 +43,18 @@ type ForecastRequest = {
   school?: string;
   school_year?: string;
   semester?: string;
+  subject?: string; // Added subject field
   items?: ForecastItem[];
   status?: string;
   date_requested?: string;
   date_approved?: string | null;
   custodian_name?: string;
+};
+
+type Subject = {
+  _id: string;
+  name: string;
+  code?: string;
 };
 
 export default function AllForecastPage() {
@@ -81,6 +88,7 @@ export default function AllForecastPage() {
   };
 
   const [requests, setRequests] = useState<ForecastRequest[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState(false);
 
@@ -96,7 +104,7 @@ export default function AllForecastPage() {
     severity: "success",
   });
 
-  // search (moved to action bar below cards)
+  // search
   const [search, setSearch] = useState("");
 
   const currentUser = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user") || "{}") : {};
@@ -117,9 +125,25 @@ export default function AllForecastPage() {
     }
   };
 
+  const fetchSubjects = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/subjects`);
+      setSubjects(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Failed to fetch subjects", err);
+    }
+  };
+
   useEffect(() => {
     fetchAll();
+    fetchSubjects();
   }, []);
+
+  const getSubjectName = (subjectId: string) => {
+    if (!subjectId) return "-";
+    const found = subjects.find(s => s._id === subjectId);
+    return found ? `${found.name}${found.code ? ` (${found.code})` : ''}` : subjectId;
+  };
 
   const openView = (r: ForecastRequest) => {
     setSelected(r);
@@ -128,7 +152,7 @@ export default function AllForecastPage() {
 
   const handleApprove = async (r: ForecastRequest) => {
     if (!r._id) return;
-    if (!window.confirm(`Approve forecast request from ${r.requester_name || r.requester_email}?`)) return;
+    if (!window.confirm(`Approve forecast request from ${r.requester_name || r.requester_email} for ${getSubjectName(r.subject || '')}?`)) return;
     setProcessing(true);
     try {
       const res = await axios.post(`${API_BASE_URL}/forecast-approval`, {
@@ -194,16 +218,17 @@ export default function AllForecastPage() {
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      {/* Header with search + actions */}
+      {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight="bold" color={brandRed}>
-          Forecast
+          Forecast Management
         </Typography>
         <Typography variant="body2" color="text.secondary">
           View and manage forecast requests submitted by Program Chairs
         </Typography>
       </Box>
 
+      {/* Summary Cards */}
       <Stack direction={{ xs: "column", md: "row" }} spacing={3} mb={3}>
         <Card
           sx={{
@@ -291,12 +316,12 @@ export default function AllForecastPage() {
         </Card>
       </Stack>
 
-      {/* Action bar (search located here to match other pages like Staff/Inventory) */}
+      {/* Search Bar */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3} justifyContent="space-between" alignItems="center">
         <Box sx={{ maxWidth: 480, width: "100%" }}>
           <TextField
             size="small"
-            placeholder="Search requester / school / year / semester..."
+            placeholder="Search requester / subject / school / year / semester..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             variant="outlined"
@@ -308,15 +333,16 @@ export default function AllForecastPage() {
         </Box>
       </Stack>
 
+      {/* Requests Table */}
       <Card sx={{ p: 3, borderRadius: 3 }}>
         <TableContainer>
-          {/* Table header selection column added */}
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>Requested</TableCell>
+                <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>Date Requested</TableCell>
                 <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>Requester</TableCell>
                 <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>School</TableCell>
+                <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>Subject</TableCell>
                 <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>School Year</TableCell>
                 <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}>Semester</TableCell>
                 <TableCell sx={{ bgcolor: "grey.50", fontWeight: "bold" }}># Items</TableCell>
@@ -332,6 +358,7 @@ export default function AllForecastPage() {
                   return (
                     (r.requester_name || r.requester_email || "").toLowerCase().includes(q) ||
                     (r.school || "").toLowerCase().includes(q) ||
+                    getSubjectName(r.subject || "").toLowerCase().includes(q) ||
                     (r.school_year || "").toLowerCase().includes(q) ||
                     (r.semester || "").toLowerCase().includes(q)
                   );
@@ -341,11 +368,18 @@ export default function AllForecastPage() {
                     <TableCell>{r.date_requested ? new Date(r.date_requested).toLocaleString() : "-"}</TableCell>
                     <TableCell>{r.requester_name || r.requester_email || "-"}</TableCell>
                     <TableCell>{r.school || "-"}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={getSubjectName(r.subject || "")} 
+                        size="small" 
+                        variant="outlined"
+                        sx={{ fontWeight: 500 }}
+                      />
+                    </TableCell>
                     <TableCell>{r.school_year || "-"}</TableCell>
                     <TableCell>{r.semester || "-"}</TableCell>
                     <TableCell>{(r.items || []).length}</TableCell>
                     <TableCell>
-                      {/* plain text status with color */}
                       <Typography
                         variant="body2"
                         sx={{
@@ -363,13 +397,13 @@ export default function AllForecastPage() {
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} justifyContent="center">
-                        <Tooltip title="View">
+                        <Tooltip title="View Details">
                           <IconButton onClick={() => openView(r)} sx={actionIconBtnSx}>
                             <VisibilityIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
 
-                        <Tooltip title="Approve">
+                        <Tooltip title="Approve Forecast">
                           <span>
                             <IconButton
                               onClick={() => handleApprove(r)}
@@ -381,7 +415,7 @@ export default function AllForecastPage() {
                           </span>
                         </Tooltip>
 
-                        <Tooltip title="Reject">
+                        <Tooltip title="Reject Forecast">
                           <span>
                             <IconButton
                               onClick={() => startReject(r)}
@@ -396,18 +430,35 @@ export default function AllForecastPage() {
                     </TableCell>
                   </TableRow>
                 ))}
+              {requests.filter(r => {
+                if (!search.trim()) return true;
+                const q = search.toLowerCase();
+                return (
+                  (r.requester_name || r.requester_email || "").toLowerCase().includes(q) ||
+                  (r.school || "").toLowerCase().includes(q) ||
+                  getSubjectName(r.subject || "").toLowerCase().includes(q) ||
+                  (r.school_year || "").toLowerCase().includes(q) ||
+                  (r.semester || "").toLowerCase().includes(q)
+                );
+              }).length === 0 && !loading && (
+                <TableRow>
+                  <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">No forecast requests found</Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Card>
 
-      {/* View Dialog */}
+      {/* View Details Dialog */}
       <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
             <VisibilityIcon sx={{ color: brandRed }} />
             <Typography variant="h6" sx={{ color: brandRed }}>
-              Forecast Details
+              Forecast Request Details
             </Typography>
           </Box>
         </DialogTitle>
@@ -415,22 +466,35 @@ export default function AllForecastPage() {
           {selected && (
             <Stack spacing={2}>
               <Box>
-                <Typography variant="subtitle2">Requester</Typography>
-                <Typography>{selected.requester_name || selected.requester_email}</Typography>
+                <Typography variant="subtitle2" color="text.secondary">Requester</Typography>
+                <Typography variant="body1">{selected.requester_name || selected.requester_email}</Typography>
               </Box>
               <Box>
-                <Typography variant="subtitle2">School / Year / Semester</Typography>
-                <Typography>
-                  {selected.school || "-"} • {selected.school_year || "-"} • {selected.semester || "-"}
+                <Typography variant="subtitle2" color="text.secondary">School</Typography>
+                <Typography variant="body1">{selected.school || "-"}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Subject</Typography>
+                <Typography variant="body1">
+                  <Chip 
+                    label={getSubjectName(selected.subject || "")} 
+                    size="small" 
+                    color="primary" 
+                    variant="outlined"
+                  />
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="subtitle2">Items</Typography>
+                <Typography variant="subtitle2" color="text.secondary">School Year / Semester</Typography>
+                <Typography variant="body1">{selected.school_year || "-"} • {selected.semester || "-"}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Requested Items</Typography>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
                       <TableCell>Item</TableCell>
-                      <TableCell align="center">Qty</TableCell>
+                      <TableCell align="center">Quantity</TableCell>
                       <TableCell>Notes</TableCell>
                     </TableRow>
                   </TableHead>
@@ -438,17 +502,38 @@ export default function AllForecastPage() {
                     {(selected.items || []).map((it, idx) => (
                       <TableRow key={idx}>
                         <TableCell>{it.item_name}</TableCell>
-                        <TableCell align="center">{it.quantity}</TableCell>
+                        <TableCell align="center">
+                          <Chip label={it.quantity} size="small" />
+                        </TableCell>
                         <TableCell>{it.notes || "-"}</TableCell>
                       </TableRow>
                     ))}
+                    {(selected.items || []).length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={3} align="center">No items requested</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">Status:</Typography>
-                <Chip label={selected.status || "Pending"} sx={{ ml: 1 }} color={selected.status === "Approved" ? "success" : selected.status === "Rejected" ? "error" : "warning"} />
+                <Typography variant="subtitle2" color="text.secondary">Status</Typography>
+                <Chip 
+                  label={selected.status || "Pending"} 
+                  color={selected.status === "Approved" ? "success" : selected.status === "Rejected" ? "error" : "warning"} 
+                />
               </Box>
+              {selected.status === "Approved" && selected.custodian_name && (
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Approved By</Typography>
+                  <Typography variant="body2">{selected.custodian_name}</Typography>
+                  {selected.date_approved && (
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(selected.date_approved).toLocaleString()}
+                    </Typography>
+                  )}
+                </Box>
+              )}
             </Stack>
           )}
         </DialogContent>
@@ -461,10 +546,17 @@ export default function AllForecastPage() {
       <Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Reject Forecast Request</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Provide a reason for rejection (optional).
+          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+            Please provide a reason for rejection (optional but recommended).
           </Typography>
-          <TextField fullWidth multiline rows={4} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+          <TextField 
+            fullWidth 
+            multiline 
+            rows={4} 
+            value={rejectReason} 
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Reason for rejection..."
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRejectDialogOpen(false)}>Cancel</Button>
@@ -472,8 +564,20 @@ export default function AllForecastPage() {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={snackbar.open} autoHideDuration={3500} onClose={() => setSnackbar((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>{snackbar.message}</Alert>
+      {/* Snackbar */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={3500} 
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))} 
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert 
+          severity={snackbar.severity} 
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          sx={{ borderRadius: 2 }}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
     </Container>
   );
